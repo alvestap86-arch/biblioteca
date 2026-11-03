@@ -6,7 +6,7 @@ function dump($var){
 function conectar(): ?PDO {
     $host = 'localhost';
     $db   = 'biblioteca';
-    $user = 'pma';
+    $user = 'root';
     $pass = '';
     $charset = 'utf8mb4';
 
@@ -26,29 +26,61 @@ function conectar(): ?PDO {
     }
 }
 
-function contarDisponibles(PDO $pdo): int {
-    $pdo = conectar();
-    if (!pdo){
-        return 0;
-    }
-    $sql = "SELECT COUNT(*) FROM libros WHERE disponible = 1";
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([]);
-        $totalDisponibles = (int) $stmt->fetchColumn();
-        return $totalDisponibles;
+// function contarDisponibles(PDO $pdo): int {
+//     $pdo = conectar();
+//     if (!pdo){
+//         return 0;
+//     }
+//     $sql = "SELECT COUNT(*) FROM libros WHERE disponible = 1";
+//     try {
+//         $stmt = $pdo->prepare($sql);
+//         $stmt->execute([]);
+//         $totalDisponibles = (int) $stmt->fetchColumn();
+//         return $totalDisponibles;
         
-    } catch (PDOException $e) {
-        throw new Exception("Error al contar las filas en la base de datos.");
-    }
-}
+//     } catch (PDOException $e) {
+//         throw new Exception("Error al contar las filas en la base de datos.");
+//     }
+// }
+    function contarDisponibles(PDO $pdo): int {
+        $sql = "SELECT COUNT(*) FROM libros WHERE disponible = 1";
 
-function obtenerLibro(PDO $pdo, int $id): array|false {
-    $pdo = conectar();
-    if(!pdo){
-        return false;
+        $stmt = $pdo->query($sql);
+
+        return (int) $stmt->fetchColumn();
     }
-    $sql = "SELECT ";
-}
+
+    function obtenerLibro(PDO $pdo, int $id): array|false {
+        $sql = "SELECT * FROM libros WHERE id = :id";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetch();
+    }
+
+    function validarGenero(string $genero){
+        $generos = ['Novela', 'Teatro', 'Ensayo', 'Poesía', 'Cómic'];
+        if (in_array($genero, $generos)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    function listarLibros(PDO $pdo, ?string $genero = null): array {
+        if ($genero === null || !validarGenero($genero)) {
+            $sql = "SELECT * FROM libros";
+            $stmt = $pdo->query($sql);
+            return $stmt->fetchAll();
+        }
+        else{
+            $sql = "SELECT * FROM libros WHERE genero = :genero";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(['genero' => $genero]);
+            return $stmt->fetchAll();
+        }
+    }
+
 
 ?>
