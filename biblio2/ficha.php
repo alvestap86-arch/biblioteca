@@ -2,8 +2,8 @@
     require_once "funciones.php";
 
     $pdo = conectar();
-
     $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
     if ($id === false || $id === null || $id < 0){
         echo('No se encontró el libro');
     } else{
@@ -19,12 +19,18 @@
     <title>ficha</title>
 </head>
 <body>
-    <h1><?= htmlspecialchars($libro['titulo'])?></h1>
-    <li>
-        <ul><?= htmlspecialchars($libro['isbn'])?></ul>
-        <ul><?= htmlspecialchars($libro['autor'])?></ul>
-        <ul><?= htmlspecialchars($libro['anio'])?></ul>
-        <ul><?= htmlspecialchars($libro['genero'])?></ul>
-    </li>
+    <?php if(!$libro):?>
+        <h1>No existe dicho libro</h1>
+    <?php else: ?>
+        <h1><?= htmlspecialchars($libro['titulo'])?></h1>
+        <ul>
+            <li><?= htmlspecialchars($libro['isbn'])?></li>
+            <li><?= htmlspecialchars($libro['autor'])?></li>
+            <li><?= htmlspecialchars($libro['anio'])?></li>
+            <li><?= htmlspecialchars($libro['genero'])?></li>
+            <li><?= $libro['disponible']>0? 'disponible':'prestado'?></li>
+    </ul>
+    <?php endif;?>
+    <a href="../index.php">volver</a>
 </body>
 </html>
